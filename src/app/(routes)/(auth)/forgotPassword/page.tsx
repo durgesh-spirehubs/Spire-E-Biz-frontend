@@ -1,105 +1,133 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-// import axiosServices from "@/lib/axios";
-import axios from "axios";
+import { useFormik } from "formik";
+import axiosServices from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
-import * as Yup from 'yup';
+import { emailSchema, resetPasswordSchema } from "@/validationSchema/validationSchema";
 const ForgotPassword = () => {
   const router = useRouter();
   const [step,setStep]=useState(1);
-  const [otp,setOtp]=useState("");
   const [email, setEmail] = useState("");
-  const [newPassword, setPassword] = useState("");
-  const [confirmPassword,setConfirmPassword]=useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const API_URL=process.env.NEXT_PUBLIC_API_BASE_URL;
-  console.log(API_URL);
-const handleSendOtp=async()=>{
-    
-        setIsLoading(true);
-    try{
-        await axios.post(`${API_URL}/api/users/send-otp`,{email})
-          toast.success("OTP sent to your email")
-          setStep(2);
-    }catch(error:any){
+const formikEmail=useFormik({
+     initialValues:{
+      email:"",
+     },
+    validationSchema:emailSchema,
+    onSubmit:async (values)=>{
+      //handleSendOtp(values.email)
+      setIsLoading(true);
+      try{
+      await axiosServices.post(`/api/users/send-otp`, {
+        email: values.email,
+      });
+      toast.success("OTP sent to your email");
+      setEmail(values.email); 
+      setStep(2);
+      }catch(error:any){
         toast.error(error.response?.data?.message)
-    }
-    finally{
+      }finally{
         setIsLoading(false)
+      }
     }
-}
-const handleResetPassword=async()=>{
-    if(!otp) return toast.error("OTP is required");
-    setIsLoading(true);
+})
+const formikResetPassword=useFormik({
+    initialValues:{
+      otp:"",
+      newPassword:"",
+      confirmPassword:""
+    },
+    validationSchema:resetPasswordSchema,
+   onSubmit:async (values, { resetForm })=>{
+   setIsLoading(true);
     try{
-       await axios.post(`${API_URL}/api/users/forget-password`,{
+ await axiosServices.post(`/api/users/forget-password`,{
             email,
-            otp,
-            newPassword
+            otp:values.otp,
+            newPassword:values.newPassword
         })
-         toast.success("Your Password is change")
-         setOtp("")
-        setPassword("")
-        setConfirmPassword("")
-
-    }catch(error){
-        console.log(error)
+        toast.success("Your Password is change")
+         resetForm();
+    }catch(error:any){
+ toast.error(error.response?.data?.message)
     }
     finally{
-        setIsLoading(false)
-    }   
-}
+      setIsLoading(false)
+    }
+    }
+})
   return (
     <div className="w-full">
       <h2 className="text-xl font-bold leading-snug text-center mb-4">Forgot Password</h2>
       {
         step===1 && (
-            <>
+            <form onSubmit={formikEmail.handleSubmit}>
             <Input
             type="email"
+            name="email"
             placeholder="Enter your email"
-            value={email}
-            onChange={(e)=>setEmail(e.target.value)}
+            value={formikEmail.values.email}
+            onChange={formikEmail.handleChange}
+            onBlur={formikEmail.handleBlur}
+            className={formikEmail.touched.email && formikEmail.errors.email ?"border-red-500 focus-visible:ring-red-500":""}
             />
-          <Button className="w-full mt-4" onClick={handleSendOtp}>
+          {formikEmail.touched.email && formikEmail.errors.email && (
+            <div className="text-red-500 text-sm mt-2">{formikEmail.errors.email}</div>
+          )}
+          <Button className="w-full mt-4" type="submit" disabled={isLoading}>
             {isLoading ? "Sending OTP..." : "Send OTP"}
           </Button>
-            </>
+            </form>
         )
       }
       {
         step ===2 && (
-            <>
+            <form onSubmit={formikResetPassword.handleSubmit}>
             <Input 
             type="text"
+            name="otp"
             placeholder="Enter Otp"
-            value={otp}
-            onChange={(e)=>setOtp(e.target.value)}
+            value={formikResetPassword.values.otp}
+            onChange={formikResetPassword.handleChange}
+            onBlur={formikResetPassword.handleBlur}
+            className={formikResetPassword.touched.otp && formikResetPassword.errors.otp ?"border-red-500 focus-visible:ring-red-500 mt-3":"mt-3"}
             />
+          {formikResetPassword.touched.otp && formikResetPassword.errors.otp && (
+            <div className="text-red-500 text-sm mt-2">{formikResetPassword.errors.otp}</div>
+          )}
            <Input
             type="password"
+            name="newPassword"
             placeholder="New Password"
-            className="mt-3"
-            value={newPassword}
-            onChange={(e)=>setPassword(e.target.value)}
+            className={formikResetPassword.touched.otp && formikResetPassword.errors.otp ?"border-red-500 focus-visible:ring-red-500 mt-3":"mt-3"}
+            value={formikResetPassword.values.newPassword}
+            onChange={formikResetPassword.handleChange}
+            onBlur={formikResetPassword.handleBlur}
            />
+          {formikResetPassword.touched.newPassword && formikResetPassword.errors.newPassword && (
+            <div className="text-red-500 text-sm mt-2">{formikResetPassword.errors.newPassword}</div>
+          )}
              <Input
              type="password"
+             name="confirmPassword"
              placeholder="Confirm Password"
-             className="mt-3"
-             value={confirmPassword}
-             onChange={(e)=>setConfirmPassword(e.target.value)}
+             className={formikResetPassword.touched.otp && formikResetPassword.errors.otp ?"border-red-500 focus-visible:ring-red-500 mt-3":"mt-3"}
+             value={formikResetPassword.values.confirmPassword}
+             onChange={formikResetPassword.handleChange}
+             onBlur={formikResetPassword.handleBlur}
              />
-             <Button className="w-full mt-4" onClick={handleResetPassword}>
+            {formikResetPassword.touched.confirmPassword && formikResetPassword.errors.confirmPassword && (
+            <div className="text-red-500 text-sm mt-2">{formikResetPassword.errors.confirmPassword}</div>
+          )}
+             <Button className="w-full mt-4" type="submit"   disabled={isLoading}>
                         {isLoading ? "Resetting....":"Reset Password"}
              </Button>
-            </>
+            </form>
         )
       }
     </div>

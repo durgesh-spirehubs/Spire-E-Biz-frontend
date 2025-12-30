@@ -123,7 +123,7 @@ export default function useHandleForm(
         if (handleSuccessResponce && res?.status === "success") {
           handleSuccessResponce();
         }
-        return res, toast.success(res.message);
+        return res, toast.success(res.data.message);
       })
       .catch((err) => {
         if (err?.type === "validationError") {

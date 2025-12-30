@@ -23,7 +23,6 @@ export function FilterColumn({ columns, setColumns }: any) {
       )
     );
   };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

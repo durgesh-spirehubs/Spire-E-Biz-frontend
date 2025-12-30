@@ -38,6 +38,11 @@ export function ProfileMenu() {
               {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
             </DropdownMenuItem>
           </Link>
+          <Link href="/changePassword">
+            <DropdownMenuItem>
+             Change Passsword
+            </DropdownMenuItem>
+          </Link>
           <Link href="/setting">
             <DropdownMenuItem>
               Settings

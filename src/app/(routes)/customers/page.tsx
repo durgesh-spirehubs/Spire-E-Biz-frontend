@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import Iconify from "@/components/ui/iconify";
 import { deleteCustomer, getCustomersList } from "@/api/customer";
 import { FilterColumn } from "@/components/common/FilterColumn";
+import axiosServices from "@/lib/axios";
 
 interface User {
   id: number;
@@ -35,27 +36,28 @@ const Customers = () => {
   const [isFetching, setIsFetching] = useState(true);
   const [currentPage, setCurrentPage] = useState(pageParam);
   const [totalPages, setTotalPages] = useState(1);
-  const pageLimit = 1;
+  const pageLimit = 5;
+  const handleStatusChange = async (id: number, status: string) => {
+  try {
+       await axiosServices.patch(`/api/customers/${id}`,{
+        status
+       })
+    setData((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, status } : item
+      )
+    );
+    toast.success(`Status set to ${status}`);
+  } catch (error) {
+    toast.error("Failed to update status");
+  }
+};
 
   const allColumns: Column<User>[] = [
-    {
-      header: "Business Name",
-      accessor: "businessName",
-      sortable: true,
-      filterable: false,
-      isVisible: true,
-      action: (row) => handleDetails(row),
-    },
     {
       header: "Contact Person",
       accessor: "first_name",
       isVisible: true,
-    },
-    {
-      header: "Business Type",
-      accessor: "businessTypeDetails",
-      isVisible: true,
-      render: (value, row) => <p>{row?.businessTypeDetails?.name}</p>,
     },
     {
       header: "Email ID",
@@ -64,21 +66,68 @@ const Customers = () => {
       render: (value, row) => (
         <p>
           {row?.email_address}
-          <br />
+        </p>
+      ),
+    },
+      {
+      header: "Phone Number",
+      accessor: "phone_number",
+      isVisible: true,
+      render: (value, row) => (
+        <p>
           {row?.phone_number}
         </p>
       ),
     },
+
     {
-      header: "Current Package",
-      accessor: "currentPackage",
-      isVisible: true,
-    },
-    {
-      header: "Status",
-      accessor: "status",
-      isVisible: true,
-    },
+  header: "Status",
+  accessor: "status",
+  isVisible: true,
+  render: (value, row) => (
+    <label className="relative inline-flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        className="sr-only peer"
+        checked={value === "Active"}
+        onChange={() =>
+          handleStatusChange(
+            row.id,
+            value === "Active" ? "InActive" : "Active"
+          )
+        }
+      />
+      <div
+        className="
+          w-11 h-6 
+          bg-gray-300 
+          peer-focus:outline-none 
+          rounded-full 
+          peer 
+          peer-checked:bg-blue-500
+          transition-colors
+        "
+      >
+        <div
+          className="
+            absolute top-0.5 left-0.5
+            w-5 h-5
+            bg-white
+            rounded-full
+            transition-transform
+            peer-checked:translate-x-5
+          "
+        />
+      </div>
+       <div
+  >
+
+  </div>
+
+    </label>
+  ),
+},
+ 
   ];
 
   const [columns, setColumns] = useState(allColumns);

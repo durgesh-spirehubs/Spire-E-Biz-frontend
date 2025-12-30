@@ -49,8 +49,8 @@ interface FormValues {
 
 const validationSchema = yup.lazy((values: FormValues) => {
   const baseSchema: Partial<Record<keyof FormValues, yup.AnySchema>> = {
-    businessTypeId: yup.number().required("Business Type is required."),
-    businessName: yup.string().required("First Name is required."),
+   // businessTypeId: yup.number().required("Business Type is required."),
+   // businessName: yup.string().required("First Name is required."),
     first_name: yup.string().required("Contact Person is required."),
     phone_number: yup.string().required("Phone Number is required."),
     email_address: yup.string().required("Email Address is required."),
