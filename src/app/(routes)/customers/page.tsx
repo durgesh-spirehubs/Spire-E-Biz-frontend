@@ -12,6 +12,7 @@ import Iconify from "@/components/ui/iconify";
 import { deleteCustomer, getCustomersList } from "@/api/customer";
 import { FilterColumn } from "@/components/common/FilterColumn";
 import axiosServices from "@/lib/axios";
+import { exportReportPurchaseOrder } from "@/api/excelExportData";
 
 interface User {
   id: number;
@@ -127,12 +128,21 @@ const Customers = () => {
     </label>
   ),
 },
- 
   ];
-
   const [columns, setColumns] = useState(allColumns);
-
   const actions = [
+     {
+      label: "View",
+      icon: (
+        <Iconify
+          icon="lucide:view"
+          width={22}
+          height={22}
+          className="text-gray"
+        />
+      ),
+      onClick: (row: User) => handleDetails(row),
+    },
     {
       label: "Edit",
       icon: (
@@ -196,7 +206,7 @@ const Customers = () => {
   };
 
   const handleDetails = (row: User) => {
-    console.log(row, "view detail page");
+   router.push(`customers/${row?.id}`);
   };
 
   const handlePageChange = (page: number) => {
@@ -211,10 +221,26 @@ const Customers = () => {
   const handleSort = (column: keyof User, direction: "asc" | "desc") => {
     console.log(`Sort by ${column} in ${direction} order`);
   };
-
   const handleFilter = (column: keyof User, filterValue: string) => {
     console.log(`Filter by ${column} with value ${filterValue}`);
   };
+  const handleExport = async () => {
+  try {
+    const response = await exportReportPurchaseOrder();
+    // Create a downloadable file
+    const blob = new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Purchase_Order_Report.xlsx";
+    link.click();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Export failed", error);
+  }
+};
 
   const tabValue: string | any[] = [
     // {
@@ -245,7 +271,7 @@ const Customers = () => {
       />
       <div className="flex gap-2">
         <FilterColumn columns={columns} setColumns={setColumns} />
-        <Button variant="outline" className="gap-1">
+        <Button variant="outline" className="gap-1" onClick={handleExport}>
           <Iconify icon="ph:export" width={18} height={18} /> Export
         </Button>
         <SelectColumn columns={columns} setColumns={setColumns} />
@@ -311,6 +337,5 @@ const Customers = () => {
     </MainCard>
   );
 };
-
 Customers.routePermission = ["Admin", "Customers"];
 export default Customers;

@@ -2,7 +2,7 @@ import axiosServices from "@/lib/axios";
 export function getTotalAttendance(query?: string) {
   return new Promise((resolve, reject) => {
     axiosServices
-      .get(`/api/customers${query}`)
+      .get(`/api//dashboard/attendances${query}`)
       .then((res) => {
         resolve(res.data);
       })

@@ -1,41 +1,122 @@
- export default  function Attendance(){
-   return(
- <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold">Employee Status</h2>
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col text-sm">
-              <span className="text-gray-400">Filter By</span>
-              <button className="flex items-center gap-2 border rounded-lg px-3 py-2">
-                Date
-                <span>▼</span>
-              </button>
-            </div>
-            <div className="flex flex-col text-sm">
-              <span className="text-gray-400">Select Date</span>
-              <div className="flex items-center gap-2 border rounded-lg px-3 py-2">
-                30-12-2025
-                📅
+"use client";
+import React from "react";
+import { getTotalAttendance } from "@/api/dashboard";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Calendar } from "../ui/calendar";
+export default function Attendance() {
+  const [data, setData] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [filterType, setFilterType] = useState("weekly");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [totalPresentEmployee, setTotalPresentEmployee] = useState(0);
+  const [totalEmployee, setTotalEmployee] = useState(20);
+  const fetchTotalAttendance = () => {
+    setIsLoading(true);
+    let query = "";
+    if (filterType !== "customDate") {
+      query = `?type=${filterType}`;
+    }
+    if (filterType === "customDate") {
+      query = `?type=${filterType}&startDate=${startDate}&endDate=${endDate}`;
+    }
+    getTotalAttendance(query)
+      .then((res: any) => {
+        setData(res?.data);
+        setTotalPresentEmployee(res?.data?.attendance?.totalPresentEmployees)
+      })
+      .catch((error) => {
+        toast.error(error?.message || "Failed to load attendance");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+  useEffect(() => {
+    if (filterType === "customDate") {
+      if (!startDate || !endDate) return;
+    }
+    fetchTotalAttendance();
+  }, [filterType,startDate,endDate]);
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-sm mr-2">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold">Employee Status</h2>
+        <div className="flex justify-between  gap-4">
+          <div className="flex flex-col text-sm">
+            <span className="text-gray-400 text-center mb-1 ">Filter By</span>
+            <DropdownMenu >
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2  rounded-lg px-3 py-2 text-sm  border border-gray-300 focus:outline-none  focus-visible:ring-2 focus-visible:ring-blue-500">
+                  {filterType.charAt(0).toUpperCase() +
+                    filterType.slice(1)}
+                  <span>▼</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setFilterType("weekly")}>
+                  Weekly
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterType("monthly")}>
+                  Monthly
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterType("yearly")}>
+                  Yearly
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterType("customDate")}>
+                  Custom Date
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="mt-2">
+            {filterType === "customDate" && (
+              <div className="flex   mt-2 flex flex-col">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="border border-gray-300 rounded-lg p-2 outline-none"
+                />
+                <span>to</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="border border-gray-300 rounded-lg p-2 outline-none"
+                />
               </div>
-            </div>
+            )}
+          </div>
+          <div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="border rounded-xl p-4 flex items-center gap-4">
-            <span className="w-4 h-4 rounded-full bg-purple-500" />
-            <div>
-              <p className="text-gray-500 text-sm">Present</p>
-              <p className="text-xl font-semibold">0</p>
-            </div>
-          </div>
-          <div className="border rounded-xl p-4 flex items-center gap-4">
-            <span className="w-4 h-4 rounded-full bg-teal-400" />
-            <div>
-              <p className="text-gray-500 text-sm">Absent</p>
-              <p className="text-xl font-semibold">11</p>
-            </div>
-          </div>
+        <div>
         </div>
       </div>
-   )
- }
+      <div className="flex  flex-col md:flex-row  w-full gap-2 ">
+        <div className="flex  space-x-2 bg-white py-5 rounded-lg shadow w-full md:w-1/2 w-1/2 flex-col p-3">
+          <div className="flex items-center gap-2 text-gray-600 ">
+            <div className="w-3 h-3 bg-blue-500 rounded-full shadow-3xl shadow-blue-500"></div>
+            <span>Present</span>
+          </div>
+          <div className="text-2xl font-semibold text-gray-700 mt-2">{totalPresentEmployee}</div>
+        </div>
+        <div className="flex  space-x-2 bg-white py-5 rounded-lg shadow w-full md:w-1/2 flex-col p-3">
+          <div className="flex items-center gap-2 text-gray-600 ">
+            <div className="w-3 h-3 bg-teal-400 rounded-full shadow-3xl shadow-blue-500"></div>
+            <span>Absent</span>
+          </div>
+          <div className="text-2xl font-semibold text-gray-700 mt-2">{totalEmployee - totalPresentEmployee}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
