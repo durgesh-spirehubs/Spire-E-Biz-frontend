@@ -35,7 +35,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import Loader from "@/components/ui/loader";
-
 const DataTable = <T,>({
   columns,
   data,
@@ -50,9 +49,11 @@ const DataTable = <T,>({
   const [sortColumn, setSortColumn] = useState<keyof T | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showFilter, setShowFilter] = useState<any>([]);
+
   const [selectedRows, setSelectedRows] = useState<any>([]);
   const [filters, setFilters] = useState<any>({});
-
+  // const [showFilter, setShowFilter] = useState<(keyof T)[]>([]);
+// 
   const handleSort = (column: keyof T) => {
     let direction: "asc" | "desc" = "asc";
     if (sortColumn === column && sortDirection === "asc") {
@@ -62,7 +63,6 @@ const DataTable = <T,>({
     setSortDirection(direction);
     onSort && onSort(column, direction);
   };
-
   const handleShowFilter = (column: string) => {
     if (showFilter.includes(column)) {
       const filterList = showFilter.filter((value: any) => value !== column);
@@ -72,25 +72,21 @@ const DataTable = <T,>({
     }
   };
 
+
   const handleFilterChange = (column: keyof T, value: string) => {
     setFilters((prev: any) => ({ ...prev, [column]: value }));
     onFilter && onFilter(column, value);
   };
-
   const handleSelectRows = (id: any) => {
     const isRowSelected = selectedRows.includes(id);
-
     const updatedRows = isRowSelected
       ? selectedRows.filter((selectedId: any) => selectedId !== id)
       : [...selectedRows, id];
-
     setSelectedRows(updatedRows);
-
     if (onSelect) {
       onSelect(updatedRows);
     }
   };
-
   const handleSelectAllRows = () => {
     if (selectedRows?.length === data?.length) {
       setSelectedRows([]);
@@ -101,7 +97,6 @@ const DataTable = <T,>({
       onSelect(allIds);
     }
   };
-
   const renderHeader = () => {
     return (
       <TableHeader className="bg-blue-100">
@@ -178,11 +173,12 @@ const DataTable = <T,>({
                     <>
                       {column?.filterType === "select" ? (
                         <div className="mt-1 py-1">
-                          <Select>
+                          <Select
+                          >
                             <SelectTrigger className="w-[180px] font-normal h-[30px] rounded">
                               <SelectValue
                                 className="font-normal"
-                                placeholder={`Select ${column.header}`}
+                                placeholder={`Select  ${column.header}`}
                               />
                             </SelectTrigger>
                             <SelectContent>

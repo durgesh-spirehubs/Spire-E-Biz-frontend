@@ -1,5 +1,5 @@
+"use client"
 import MainCard from "@/components/dashboard/main-card";
-
 export interface UserData {
   id: number;
   user_id: string;

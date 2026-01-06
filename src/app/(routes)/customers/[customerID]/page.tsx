@@ -27,10 +27,6 @@ const CustomerDetailsPage = () => {
 
   if (isLoading) {
     return (
-    //   <Stack justifyContent='center' alignItems='center' sx={{ width: '100%', py: 2 }}>
-    //     <CircularProgress size={50} />
-
-    //   </Stack>
       <Loader/>
     )
   } else {
@@ -38,3 +34,5 @@ const CustomerDetailsPage = () => {
   }
 }
 export default CustomerDetailsPage;
+
+
