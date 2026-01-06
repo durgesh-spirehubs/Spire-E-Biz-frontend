@@ -13,6 +13,7 @@ import HeaderNavigation from "./header/header-navigation";
 import { navigation } from "@/config/layout-config";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import RoleGuard from "@/lib/roleGuard";
 export default function DashboardLayout({ children }: any) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
@@ -22,7 +23,6 @@ export default function DashboardLayout({ children }: any) {
     setSidebarOpen(false);
   }
 }, [pathname]);
-
   return (
     <DashboardLayoutDiv className="bg-slate-100 dark:bg-slate-900 flex flex-col p-4 pt-0 pb-1">
       <DashboardHeaderDiv>
@@ -59,9 +59,11 @@ export default function DashboardLayout({ children }: any) {
             </div>
           </>
         )}
+        <RoleGuard allowedRoles={["Admin","Staff","Customer"]}>
         <DashboardContentDiv className="flex-1 overflow-y-auto p-3">
           {children}
         </DashboardContentDiv>
+         </RoleGuard>
       </DashboardWrapperDiv>
     </DashboardLayoutDiv>
   );

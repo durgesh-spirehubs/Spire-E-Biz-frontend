@@ -5,14 +5,11 @@ import { redirect, usePathname } from "next/navigation";
 import DashboardLayout from "./dashboard";
 import Loader from "@/components/ui/loader";
 import AuthLayout from "./auth";
-
 interface LayoutProps {
   children: ReactNode;
 }
-
 // PUBLIC ROUTE LIST
 const publicRouteList = ["/login", "/register","/forgotPassword","/sendOtp"];
-
 const useAuthRedirect = (
   isLoggedIn: boolean,
   isAuthLoading: boolean,
@@ -31,18 +28,15 @@ const useAuthRedirect = (
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { isLoggedIn, isAuthLoading } = useAuth();
   const pathname = usePathname();
-
   useAuthRedirect(isLoggedIn, isAuthLoading, pathname);
-
   if (isAuthLoading) {
     return <Loader />;
   }
-
-  if (isLoggedIn) {
-    return <DashboardLayout>{children}</DashboardLayout>;
-  }
-
+  if(isLoggedIn){
+    return (
+      <DashboardLayout>{children}</DashboardLayout>
+  );
+}
   return <AuthLayout>{children}</AuthLayout>;
 };
-
 export default Layout;

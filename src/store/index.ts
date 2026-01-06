@@ -11,10 +11,7 @@ import rootReducer from "./reducer";
 const store = configureStore({
   reducer: rootReducer,
 });
-
 const { dispatch } = store;
-
 const useDispatch = () => useAppDispatch<Dispatch<AnyAction>>();
 const useSelector = useAppSelector;
-
 export { store, globalAction, dispatch, useSelector, useDispatch };

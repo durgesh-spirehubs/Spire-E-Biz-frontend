@@ -83,5 +83,4 @@ const Login = () => {
     </div>
   );
 };
-Login.userRole = ["Admin"]
 export default Login;
