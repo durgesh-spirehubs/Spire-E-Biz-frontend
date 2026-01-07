@@ -1,5 +1,5 @@
+"use client"
 import MainCard from "@/components/dashboard/main-card";
-
 export interface UserData {
   id: number;
   user_id: string;
@@ -9,7 +9,22 @@ export interface UserData {
   phone_number: string;
   customer_type?: string; 
   status?: string;      
-  createdAt?: string;   
+  createdAt?: string;
+  addresses?: {
+      addressType?: string;
+      addressLine1?: string;
+      addressLine2?: string;
+      pincode?: string;
+      city?:{
+        cityName?: string;
+      };
+      state?:{
+        stateName?: string;
+      };
+      country?:{
+        countryName?:string;
+      }
+  }
 }
 interface CustomerDetailsProps{
     data:UserData | undefined
@@ -61,20 +76,36 @@ const CustomerDetails : React.FC<CustomerDetailsProps>=({data}) => {
                 </div>
                  <hr/>
                  <p className="font-semibold text-lg text-blue-700 gap-2 mt-2">Address:</p>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 mb-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4 mb-6">
                     <div>
-                    <div className="font-medium">Current Address</div>
-                    <div className="text-gray-700">{data.status}</div>
+                       <div className="font-medium">Address Type</div>
+                       <div className="text-gray-700">{data?.addresses?.addressType}</div>
+                    </div>
+                    <div>
+                       <div className="font-medium">Address Line 1</div>
+                       <div className="text-gray-700">{data?.addresses?.addressLine1}</div>
+                    </div>
+                    <div>
+                       <div className="font-medium">Address Line 2</div>
+                       <div className="text-gray-700">{data?.addresses?.addressLine2}</div>
+                    </div>
+                    <div>
+                       <div className="font-medium">Pin  Code</div>
+                       <div className="text-gray-700">{data?.addresses?.pincode}</div>
+                    </div>
+                    <div>
+                       <div className="font-medium">City</div>
+                       <div className="text-gray-700">{data?.addresses?.city?.cityName}</div>
+                    </div>
+                    <div>
+                       <div className="font-medium">State</div>
+                       <div className="text-gray-700">{data?.addresses?.state?.stateName}</div>
+                    </div>
+                    <div>
+                       <div className="font-medium">Country</div>
+                       <div className="text-gray-700">{data?.addresses?.country?.countryName}</div>
                     </div>
                  </div>
-                
-            <h1>
-                Customer: {data.first_name} {data.last_name}
-            </h1>
-            <p>Email: {data.email_address}</p>
-            <p>Phone: {data.phone_number}</p>
-         
-            <pre>{JSON.stringify(data, null, 2)}</pre>
            </div>
         </MainCard>
     )

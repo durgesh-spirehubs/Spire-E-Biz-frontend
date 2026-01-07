@@ -30,6 +30,7 @@ export interface DataTableProps<T> {
   onSort?: (column: keyof T, direction: "asc" | "desc") => void;
   onFilter?: (column: keyof T, filterValue: string) => void;
   onSelect: (selectedRows: any) => void;
+   filters?: Record<string, string>; 
   isCheckbox: Boolean;
   isFetching?: Boolean;
 }

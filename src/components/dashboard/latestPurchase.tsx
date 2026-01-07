@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import Iconify from "@/components/ui/iconify";
 import { SelectColumn } from "@/components/common/SelectColumn";
 import { FilterColumn } from "@/components/common/FilterColumn";
+import { exportReportPurchaseOrder } from "@/api/excelExportData";
 import axiosServices from "@/lib/axios";
 interface PurchaseOrder {
   id: number;
@@ -24,10 +25,8 @@ interface PurchaseOrder {
 const LatestPurchaseOrders = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const pageParam = Number(searchParams.get("page")) || 1;
   const pageLimit = 5;
-
   const [searchValue, setSearchValue] = useState("");
   const [data, setData] = useState<PurchaseOrder[]>([]);
   const [selectedRows, setSelectedRows] = useState<PurchaseOrder[]>([]);
@@ -149,7 +148,6 @@ const LatestPurchaseOrders = () => {
       .catch((err) => toast.error(err.message))
       .finally(() => setIsFetching(false));
   };
-
   useEffect(() => {
     fetchPurchaseOrders();
   }, [searchValue, currentPage]);
@@ -158,20 +156,38 @@ const LatestPurchaseOrders = () => {
     router.push(`?page=${page}`);
     setCurrentPage(page);
   };
-
+    const handleExport = async () => {
+    try {
+      const response = await exportReportPurchaseOrder();
+      // Create a downloadable file
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Purchase_Order_Report.xlsx";
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed", error);
+    }
+  };
   const TableSearchFilter = () => (
-    <div className="flex justify-between gap-2 py-2">
+    <div className="flex gap-2 items-center justify-between py-2">
       <input
         type="text"
-        placeholder="Search purchase orders"
+        placeholder="Search here"
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
-        className="border rounded px-3 py-2 text-sm min-w-64"
+        className="mt-1 py-2 px-2 border border-gray-300 rounded text-sm font-normal min-w-64"
+        autoFocus
       />
-      {/* <div className="flex gap-2">
-        <FilterColumn columns={columns} setColumns={setColumns} />
-        <SelectColumn columns={columns} setColumns={setColumns} />
-      </div> */}
+      <div className="flex gap-2">
+        <Button variant="outline" className="gap-1" onClick={handleExport}>
+          <Iconify icon="ph:export" width={18} height={18} /> Export
+        </Button>
+      </div>
     </div>
   );
   return (
@@ -186,7 +202,6 @@ const LatestPurchaseOrders = () => {
       ) : (
         <TableSearchFilter />
       )}
-
       <DataTable
         columns={columns}
         data={data}
@@ -204,6 +219,4 @@ const LatestPurchaseOrders = () => {
     </MainCard>
   );
 };
-
-LatestPurchaseOrders.routePermission = ["Admin", "PurchaseOrders"];
 export default LatestPurchaseOrders;

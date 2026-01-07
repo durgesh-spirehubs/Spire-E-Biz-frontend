@@ -24,5 +24,5 @@ const Dashboard = () => {
     </>
   );
 };
-Dashboard.userRole = ["Admin"];
+// Dashboard.userRole = ["Staff"];
 export default Dashboard;
