@@ -87,7 +87,6 @@ export const AuthProvider = ({ children }: any) => {
         });
       }
     } catch (err) {
-      console.error(err);
       dispatch({
         type: LOGOUT,
       });

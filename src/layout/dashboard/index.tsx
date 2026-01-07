@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: any) {
           <HeaderNavigation />
         </HeaderNavigationDiv>
       )}
-      <DashboardWrapperDiv className="flex flex-1 relative">
+      <DashboardWrapperDiv className="flex flex-1">
         {navigation === "vertical" && (
           <>
             <DashboardSidebarDiv
