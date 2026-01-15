@@ -13,7 +13,6 @@ import { deleteCustomer, getCustomersList } from "@/api/customer";
 import { FilterColumn } from "@/components/common/FilterColumn";
 import axiosServices from "@/lib/axios";
 import { exportReportPurchaseOrder } from "@/api/excelExportData";
-
 interface User {
   id: number;
   name: string;
@@ -26,7 +25,6 @@ interface User {
   role: string;
   status: string;
 }
-
 const Customers = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,28 +35,31 @@ const Customers = () => {
   const [isFetching, setIsFetching] = useState(true);
   const [currentPage, setCurrentPage] = useState(pageParam);
   const [totalPages, setTotalPages] = useState(1);
+  const [filterColumn, setFilterColumn] = useState<keyof User | null>(null);
+  const [sortBy, setSortBy] = useState<keyof User | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const pageLimit = 5;
   const handleStatusChange = async (id: number, status: string) => {
-  try {
-       await axiosServices.patch(`/api/customers/${id}`,{
+    try {
+      await axiosServices.patch(`/api/customers/${id}`, {
         status
-       })
-    setData((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, status } : item
-      )
-    );
-    toast.success(`Status set to ${status}`);
-  } catch (error) {
-    toast.error("Failed to update status");
-  }
-};
-
+      })
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, status } : item
+        )
+      );
+      toast.success(`Status set to ${status}`);
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
+  };
   const allColumns: Column<User>[] = [
     {
       header: "Contact Person",
       accessor: "first_name",
       isVisible: true,
+
     },
     {
       header: "Email ID",
@@ -70,7 +71,7 @@ const Customers = () => {
         </p>
       ),
     },
-      {
+    {
       header: "Phone Number",
       accessor: "phone_number",
       isVisible: true,
@@ -82,24 +83,24 @@ const Customers = () => {
     },
 
     {
-  header: "Status",
-  accessor: "status",
-  isVisible: true,
-  render: (value, row) => (
-    <label className="relative inline-flex items-center cursor-pointer">
-      <input
-        type="checkbox"
-        className="sr-only peer"
-        checked={value === "Active"}
-        onChange={() =>
-          handleStatusChange(
-            row.id,
-            value === "Active" ? "InActive" : "Active"
-          )
-        }
-      />
-      <div
-        className="
+      header: "Status",
+      accessor: "status",
+      isVisible: true,
+      render: (value, row) => (
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="sr-only peer"
+            checked={value === "Active"}
+            onChange={() =>
+              handleStatusChange(
+                row.id,
+                value === "Active" ? "InActive" : "Active"
+              )
+            }
+          />
+          <div
+            className="
           w-11 h-6 
           bg-gray-300 
           peer-focus:outline-none 
@@ -108,30 +109,27 @@ const Customers = () => {
           peer-checked:bg-blue-500
           transition-colors
         "
-      >
-        <div
-          className="
+          >
+            <div
+              className="
             absolute top-0.5 left-0.5
             w-5 h-5
             bg-white
             rounded-full
             transition-transform
             peer-checked:translate-x-5
-          "
-        />
-      </div>
-       <div
-  >
-
-  </div>
-
-    </label>
-  ),
-},
+          "/>
+          </div>
+          <div
+          >
+          </div>
+        </label>
+      ),
+    },
   ];
   const [columns, setColumns] = useState(allColumns);
   const actions = [
-     {
+    {
       label: "View",
       icon: (
         <Iconify
@@ -168,80 +166,100 @@ const Customers = () => {
       onClick: (row: User) => handleDelete(row),
     },
   ];
+  // useEffect(() => {
+  //   fetchCustomersList();
+  // }, [searchValue, currentPage]);
+const fetchCustomersList = () => {
+  const params = new URLSearchParams();
+  params.append("page", String(currentPage));
+  params.append("limit", String(pageLimit));
+  if (searchValue) {
+    params.append("search", searchValue);
+  }
+  if (filterColumn) {
+    params.append("orderBy", filterColumn);
+    params.append("order", sortOrder);
+  }
 
-  const fetchCustomersList = () => {
-    const query = `?search=${searchValue}&page=${currentPage}&limit=${pageLimit}`;
-    setIsFetching(true);
-    getCustomersList(query)
-      .then((res: any) => {
-        setData(res?.data);
-        const total = res?.total;
-        setTotalPages(Math.ceil(total / pageLimit));
-      })
-      .catch((err) => {
-        toast.error(err.message);
-      })
-      .finally(() => {
-        setIsFetching(false);
-      });
-  };
+  setIsFetching(true);
+  getCustomersList(`?${params.toString()}`)
+    .then((res: any) => {
+      setData(res.data);
+      setTotalPages(Math.ceil(res.total / pageLimit));
+    })
+    .catch((err) => toast.error(err.message))
+    .finally(() => setIsFetching(false));
+};
 
   useEffect(() => {
-    fetchCustomersList();
-  }, [searchValue, currentPage]);
+  fetchCustomersList();
+}, [searchValue, currentPage, sortBy, sortOrder, filterColumn, pageLimit]);
+
 
   const handleEdit = (row: User) => {
     router.push(`customers/edit/${row?.id}`);
   };
-
   const handleDelete = (row: User) => {
     deleteCustomer(row?.id)
       .then((res: any) => {
         toast.success(res?.message);
-        fetchCustomersList();
+        setCurrentPage(1);
       })
       .catch((err) => {
         toast.error(err.message);
       });
   };
-
   const handleDetails = (row: User) => {
-   router.push(`customers/${row?.id}`);
+    router.push(`customers/${row?.id}`);
   };
-
   const handlePageChange = (page: number) => {
     router.push(`?page=${page}`);
     setCurrentPage(page);
   };
-
   const handleSelectRows = (rows: User[]) => {
     setSelectedRows(rows);
   };
-
   const handleSort = (column: keyof User, direction: "asc" | "desc") => {
-    console.log(`Sort by ${column} in ${direction} order`);
+    setSortBy(column);
+    setSortOrder(direction);
+    setCurrentPage(1);
   };
   const handleFilter = (column: keyof User, filterValue: string) => {
-    console.log(`Filter by ${column} with value ${filterValue}`);
+    console.log(`filter value for ${column}: ${filterValue}`);
   };
   const handleExport = async () => {
-  try {
-    const response = await exportReportPurchaseOrder();
-    // Create a downloadable file
-    const blob = new Blob([response.data], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "Purchase_Order_Report.xlsx";
-    link.click();
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Export failed", error);
-  }
-};
-
+    try {
+      const response = await exportReportPurchaseOrder();
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Purchase_Order_Report.xlsx";
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed", error);
+    }
+  };
+   const handleMultipleDelete=async (rows:User[])=>{
+    try{
+        if(!rows || rows.length ===0){
+          toast.error("No customers selected");
+          return;
+        }
+        await axiosServices.post('/api/customers/bulkdeleteCustomer',{
+          customerArrayId:rows
+        })
+      setSelectedRows([]);
+      toast.success("Customers deleted successfully");
+      setCurrentPage(1);
+      fetchCustomersList();
+    }catch(error:any){
+      toast.error(error?.message || "Failed to delete bulk customers ");
+    }
+   }
   const tabValue: string | any[] = [
     // {
     //   label: "Account",
@@ -258,7 +276,6 @@ const Customers = () => {
     //   },
     // },
   ];
-
   const TableSearchFilter = () => (
     <div className="flex gap-2 items-center justify-between py-2">
       <input
@@ -270,7 +287,13 @@ const Customers = () => {
         autoFocus
       />
       <div className="flex gap-2">
-        <FilterColumn columns={columns} setColumns={setColumns} />
+        <FilterColumn
+          columns={columns}
+          onSelectColumn={(accessor: string) => {
+            setFilterColumn(accessor as keyof User);
+            setCurrentPage(1);
+          }}
+        />
         <Button variant="outline" className="gap-1" onClick={handleExport}>
           <Iconify icon="ph:export" width={18} height={18} /> Export
         </Button>
@@ -278,7 +301,6 @@ const Customers = () => {
       </div>
     </div>
   );
-
   return (
     <MainCard
       title="Customers"
@@ -311,6 +333,7 @@ const Customers = () => {
             size="sm"
             variant="outline"
             className="text-red-500 hover:text-red-500 border-red-500 hover:border-red-500"
+            onClick={() => handleMultipleDelete(selectedRows)}
           >
             Delete
           </Button>

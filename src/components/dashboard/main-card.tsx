@@ -44,5 +44,4 @@ const MainCard = ({
     </div>
   );
 };
-
 export default MainCard;

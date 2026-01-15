@@ -23,14 +23,12 @@ import {
 import { CalendarIcon } from "lucide-react"
 import { getPendingSalesOrder } from "@/api/dashboard"
 import { ProjectStaticsChart } from "../charts/project-statistics-chart"
-export default function DashboardGraph() {
+const DashboardGraph = function DashboardGraph() {
   const [filterType, setFilterType] = useState("week")
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-
   const [startDate, setStartDate] = useState<Date | undefined>()
   const [endDate, setEndDate] = useState<Date | undefined>()
-
   const fetchPendingOrder = () => {
     setIsLoading(true)
     let query = ""
@@ -43,7 +41,6 @@ export default function DashboardGraph() {
     getPendingSalesOrder(query)
       .then((res: any) => {
         const sales = res?.data?.sales
-
         const chartData = sales.labels.map(
           (label: string, index: number) => ({
             date: label,
@@ -129,3 +126,4 @@ export default function DashboardGraph() {
     </Card>
   )
 }
+export default DashboardGraph;

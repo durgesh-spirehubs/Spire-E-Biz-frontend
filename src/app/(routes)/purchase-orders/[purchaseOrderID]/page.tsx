@@ -4,16 +4,17 @@ import { useEffect, useState } from 'react'
 import axiosServices from '@/lib/axios'
 import Loader from '@/components/ui/loader'
 import CustomerDetails from '@/view/customer/customerDetails'
-const CustomerDetailsPage = () => {
+import PurchaseOrderDetails from '@/view/purchase-order/purchaseOrderDetails'
+const PurchaseOrderDetailsPage = () => {
   const [currentData, setCurrentData] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
-  const {customerID}=useParams();
+  const {purchaseOrderID}=useParams();
   useEffect(() => {
-    if (!customerID) return;
+    if (!purchaseOrderID) return;
     const fetchSingleData = async () => {
       setIsLoading(true);
       try {
-        const response = await axiosServices.get(`/api/customers/${customerID}`);
+        const response = await axiosServices.get(`/api/items-purchase-orders/${purchaseOrderID}`);
         setCurrentData(response?.data?.data);
       } catch (err) {
         if ((err as any)?.code === 'ERR_CANCELED') return;
@@ -23,16 +24,16 @@ const CustomerDetailsPage = () => {
       }
     };
     fetchSingleData();
-  }, [customerID])
+  }, [purchaseOrderID])
 
   if (isLoading) {
     return (
       <Loader/>
     )
   } else {
-    return <CustomerDetails data={currentData}  />
+    return <PurchaseOrderDetails data={currentData}  />
   }
 }
-export default CustomerDetailsPage;
+export default PurchaseOrderDetailsPage;
 
 

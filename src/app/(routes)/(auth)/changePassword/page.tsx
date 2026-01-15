@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { changePasswordSchema} from "@/validationSchema/validationSchema";
 const ChangePassword = () => {
   const router = useRouter();
-
   const [isLoading, setIsLoading] = useState(false);
 const formikChangePassword=useFormik({
     initialValues:{

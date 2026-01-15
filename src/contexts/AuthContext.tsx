@@ -87,7 +87,6 @@ export const AuthProvider = ({ children }: any) => {
         });
       }
     } catch (err) {
-      console.error(err);
       dispatch({
         type: LOGOUT,
       });
@@ -146,5 +145,4 @@ export const AuthProvider = ({ children }: any) => {
     </AuthContext.Provider>
   );
 };
-
 export const useAuth = () => useContext(AuthContext);
